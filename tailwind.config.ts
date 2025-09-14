@@ -22,10 +22,22 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
+          glow: "hsl(var(--secondary-glow))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+          glow: "hsl(var(--accent-glow))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          glow: "hsl(var(--success-glow))",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -35,10 +47,6 @@ export default {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -47,21 +55,16 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        playful: "1rem",
+        super: "1.5rem",
       },
       keyframes: {
         "accordion-down": {
@@ -80,10 +83,27 @@ export default {
             height: "0",
           },
         },
+        wiggle: {
+          "0%": { transform: "rotate(-2deg)" },
+          "100%": { transform: "rotate(2deg)" },
+        },
+        bounce: {
+          "0%, 100%": { 
+            transform: "translateY(-5%)",
+            animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)",
+          },
+          "50%": { 
+            transform: "translateY(0)",
+            animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "bounce-gentle": "bounce 2s infinite",
+        "wiggle": "wiggle 0.5s ease-in-out infinite alternate",
+        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },

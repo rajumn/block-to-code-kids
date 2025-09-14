@@ -2,39 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* CodePlayground Design System - Playful & Kid-Friendly
+All colors MUST be HSL for consistency.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors - soft and friendly */
+    --background: 220 20% 98%;
+    --foreground: 220 15% 25%;
 
+    /* Card system - clean and inviting */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 15% 25%;
 
+    /* Popover system */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 15% 25%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand colors - fun and vibrant */
+    --primary: 174 72% 56%; /* Teal */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 174 85% 70%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 280 83% 57%; /* Purple */
+    --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 280 100% 75%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 52 98% 68%; /* Yellow */
+    --accent-foreground: 45 15% 25%;
+    --accent-glow: 52 100% 80%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --success: 142 76% 36%; /* Green */
+    --success-foreground: 0 0% 100%;
+    --success-glow: 142 85% 55%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Muted system */
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 9% 46%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Destructive system */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border and input system */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 174 72% 56%;
+
+    /* Gradients - playful and engaging */
+    --gradient-rainbow: linear-gradient(135deg, hsl(174 72% 56%), hsl(280 83% 57%), hsl(52 98% 68%), hsl(142 76% 36%));
+    --gradient-primary: linear-gradient(135deg, hsl(174 72% 56%), hsl(174 85% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(280 83% 57%), hsl(280 100% 75%));
+    --gradient-accent: linear-gradient(135deg, hsl(52 98% 68%), hsl(52 100% 80%));
+    --gradient-hero: linear-gradient(135deg, hsl(174 85% 70%) 0%, hsl(280 100% 75%) 50%, hsl(52 100% 80%) 100%);
+
+    /* Shadows - soft and playful */
+    --shadow-soft: 0 4px 12px hsl(220 20% 20% / 0.08);
+    --shadow-medium: 0 8px 25px hsl(220 20% 20% / 0.12);
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.3);
+    --shadow-glow-secondary: 0 0 40px hsl(var(--secondary) / 0.3);
+    --shadow-glow-accent: 0 0 40px hsl(var(--accent) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --radius: 0.5rem;
 
@@ -100,6 +132,90 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* Kid-friendly typography */
+  .text-hero {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold;
+  }
+  
+  .text-section {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+
+  .text-card {
+    @apply text-lg md:text-xl font-semibold;
+  }
+}
+
+@layer utilities {
+  /* Gradient backgrounds */
+  .bg-gradient-rainbow {
+    background: var(--gradient-rainbow);
+  }
+  
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  /* Shadow utilities */
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .shadow-glow-secondary {
+    box-shadow: var(--shadow-glow-secondary);
+  }
+  
+  .shadow-glow-accent {
+    box-shadow: var(--shadow-glow-accent);
+  }
+
+  /* Animation utilities */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+  
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  /* Hover animations */
+  .hover-lift {
+    @apply transition-bounce hover:scale-105 hover:shadow-medium;
+  }
+  
+  .hover-glow {
+    @apply transition-smooth hover:shadow-glow;
+  }
+
+  /* Kid-friendly border radius */
+  .rounded-playful {
+    @apply rounded-2xl;
+  }
+  
+  .rounded-super {
+    @apply rounded-3xl;
   }
 }
