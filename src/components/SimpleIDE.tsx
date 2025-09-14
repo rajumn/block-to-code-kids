@@ -14,6 +14,8 @@ export const SimpleIDE = () => {
   const [mode, setMode] = useState<"blocks" | "text">("blocks");
   const [isRunning, setIsRunning] = useState(false);
   const [draggedBlock, setDraggedBlock] = useState<string | null>(null);
+  const [output, setOutput] = useState<string[]>([]);
+  const [points, setPoints] = useState(0);
   const [blocks, setBlocks] = useState<CodeBlock[]>([
     { id: "1", text: "🚀 When start button clicked", color: "primary", indent: 0 },
     { id: "2", text: "📱 Say \"Hello, World!\"", color: "secondary", indent: 1 },
@@ -22,8 +24,38 @@ export const SimpleIDE = () => {
 
   const handleRun = () => {
     setIsRunning(true);
-    // Simulate code execution
-    setTimeout(() => setIsRunning(false), 2000);
+    setOutput([]);
+    
+    // Simulate code execution with actual output
+    setTimeout(() => {
+      const newOutput: string[] = [];
+      let currentPoints = points;
+      
+      blocks.forEach((block) => {
+        if (block.text.includes("When start button clicked")) {
+          newOutput.push("🚀 Program started!");
+        } else if (block.text.includes("Say")) {
+          newOutput.push("📱 Hello, World!");
+        } else if (block.text.includes("Add") && block.text.includes("points")) {
+          const pointsToAdd = parseInt(block.text.match(/\d+/)?.[0] || "10");
+          currentPoints += pointsToAdd;
+          newOutput.push(`⭐ Added ${pointsToAdd} points! Total: ${currentPoints}`);
+        }
+      });
+      
+      if (newOutput.length === 0) {
+        newOutput.push("✨ Code executed successfully!");
+      }
+      
+      setOutput(newOutput);
+      setPoints(currentPoints);
+      setIsRunning(false);
+    }, 2000);
+  };
+
+  const handleReset = () => {
+    setOutput([]);
+    setPoints(0);
   };
 
   const handleDragStart = (e: React.DragEvent, blockId: string) => {
@@ -152,7 +184,7 @@ export const SimpleIDE = () => {
                       )}
                       {isRunning ? "Running..." : "Run"}
                     </PlayfulButton>
-                    <PlayfulButton variant="ghost" size="sm">
+                    <PlayfulButton variant="ghost" size="sm" onClick={handleReset}>
                       <RotateCcw className="w-4 h-4" />
                     </PlayfulButton>
                   </div>
@@ -165,6 +197,14 @@ export const SimpleIDE = () => {
                       <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
                       <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                       <span className="ml-2">Running your awesome code...</span>
+                    </div>
+                  ) : output.length > 0 ? (
+                    <div className="space-y-2">
+                      {output.map((line, index) => (
+                        <div key={index} className="text-foreground font-mono text-sm">
+                          {line}
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground py-8">
