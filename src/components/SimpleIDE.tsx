@@ -10,10 +10,18 @@ interface CodeBlock {
   indent: number;
 }
 
+interface PaletteBlock {
+  id: string;
+  text: string;
+  color: "primary" | "secondary" | "accent";
+  category: string;
+}
+
 export const SimpleIDE = () => {
   const [mode, setMode] = useState<"blocks" | "text">("blocks");
   const [isRunning, setIsRunning] = useState(false);
   const [draggedBlock, setDraggedBlock] = useState<string | null>(null);
+  const [draggedFromPalette, setDraggedFromPalette] = useState<PaletteBlock | null>(null);
   const [output, setOutput] = useState<string[]>([]);
   const [points, setPoints] = useState(0);
   const [blocks, setBlocks] = useState<CodeBlock[]>([
@@ -21,6 +29,30 @@ export const SimpleIDE = () => {
     { id: "2", text: "📱 Say \"Hello, World!\"", color: "secondary", indent: 1 },
     { id: "3", text: "⭐ Add 10 points", color: "accent", indent: 1 }
   ]);
+
+  // Available blocks that can be dragged from palette
+  const paletteBlocks: PaletteBlock[] = [
+    // Events
+    { id: "p1", text: "🚀 When start button clicked", color: "primary", category: "Events" },
+    { id: "p2", text: "🖱️ When mouse clicked", color: "primary", category: "Events" },
+    { id: "p3", text: "⌨️ When key pressed", color: "primary", category: "Events" },
+    
+    // Actions
+    { id: "p4", text: "📱 Say \"Hello, World!\"", color: "secondary", category: "Actions" },
+    { id: "p5", text: "🎵 Play sound", color: "secondary", category: "Actions" },
+    { id: "p6", text: "🎨 Change color", color: "secondary", category: "Actions" },
+    { id: "p7", text: "💃 Move character", color: "secondary", category: "Actions" },
+    
+    // Logic
+    { id: "p8", text: "🔄 Repeat 5 times", color: "accent", category: "Logic" },
+    { id: "p9", text: "❓ If condition", color: "accent", category: "Logic" },
+    { id: "p10", text: "⏳ Wait 2 seconds", color: "accent", category: "Logic" },
+    
+    // Numbers & Variables
+    { id: "p11", text: "⭐ Add 10 points", color: "accent", category: "Numbers" },
+    { id: "p12", text: "📊 Set score to 0", color: "accent", category: "Numbers" },
+    { id: "p13", text: "🎲 Random number", color: "accent", category: "Numbers" },
+  ];
 
   const handleRun = () => {
     setIsRunning(true);
@@ -32,14 +64,36 @@ export const SimpleIDE = () => {
       let currentPoints = points;
       
       blocks.forEach((block) => {
-        if (block.text.includes("When start button clicked")) {
-          newOutput.push("🚀 Program started!");
+        if (block.text.includes("When start button clicked") || block.text.includes("When mouse clicked") || block.text.includes("When key pressed")) {
+          newOutput.push(`🚀 ${block.text.replace(/🚀|🖱️|⌨️/g, "").trim()} triggered!`);
         } else if (block.text.includes("Say")) {
-          newOutput.push("📱 Hello, World!");
+          const message = block.text.includes("Hello, World!") ? "Hello, World!" : "Hello from CodePlayground!";
+          newOutput.push(`📱 ${message}`);
+        } else if (block.text.includes("Play sound")) {
+          newOutput.push("🎵 *Beep boop* Sound played!");
+        } else if (block.text.includes("Change color")) {
+          newOutput.push("🎨 Colors changed to rainbow!");
+        } else if (block.text.includes("Move character")) {
+          newOutput.push("💃 Character danced around!");
+        } else if (block.text.includes("Repeat")) {
+          const times = parseInt(block.text.match(/\d+/)?.[0] || "5");
+          newOutput.push(`🔄 Repeating ${times} times... Done!`);
+        } else if (block.text.includes("If condition")) {
+          newOutput.push("❓ Condition checked: True!");
+        } else if (block.text.includes("Wait")) {
+          const seconds = parseInt(block.text.match(/\d+/)?.[0] || "2");
+          newOutput.push(`⏳ Waited ${seconds} seconds... Time's up!`);
         } else if (block.text.includes("Add") && block.text.includes("points")) {
           const pointsToAdd = parseInt(block.text.match(/\d+/)?.[0] || "10");
           currentPoints += pointsToAdd;
           newOutput.push(`⭐ Added ${pointsToAdd} points! Total: ${currentPoints}`);
+        } else if (block.text.includes("Set score")) {
+          const newScore = parseInt(block.text.match(/\d+/)?.[0] || "0");
+          currentPoints = newScore;
+          newOutput.push(`📊 Score set to ${newScore}!`);
+        } else if (block.text.includes("Random number")) {
+          const randomNum = Math.floor(Math.random() * 100) + 1;
+          newOutput.push(`🎲 Random number generated: ${randomNum}`);
         }
       });
       
@@ -58,6 +112,11 @@ export const SimpleIDE = () => {
     setPoints(0);
   };
 
+  const handlePaletteDragStart = (e: React.DragEvent, block: PaletteBlock) => {
+    setDraggedFromPalette(block);
+    e.dataTransfer.effectAllowed = "copy";
+  };
+
   const handleDragStart = (e: React.DragEvent, blockId: string) => {
     setDraggedBlock(blockId);
     e.dataTransfer.effectAllowed = "move";
@@ -65,22 +124,37 @@ export const SimpleIDE = () => {
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = draggedFromPalette ? "copy" : "move";
   };
 
   const handleDrop = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
-    if (!draggedBlock) return;
+    
+    if (draggedFromPalette) {
+      // Adding new block from palette
+      const newBlock: CodeBlock = {
+        id: `block_${Date.now()}`,
+        text: draggedFromPalette.text,
+        color: draggedFromPalette.color,
+        indent: 0
+      };
+      
+      const newBlocks = [...blocks];
+      newBlocks.splice(targetIndex, 0, newBlock);
+      setBlocks(newBlocks);
+      setDraggedFromPalette(null);
+    } else if (draggedBlock) {
+      // Reordering existing blocks
+      const draggedIndex = blocks.findIndex(block => block.id === draggedBlock);
+      if (draggedIndex === -1) return;
 
-    const draggedIndex = blocks.findIndex(block => block.id === draggedBlock);
-    if (draggedIndex === -1) return;
+      const newBlocks = [...blocks];
+      const [draggedItem] = newBlocks.splice(draggedIndex, 1);
+      newBlocks.splice(targetIndex, 0, draggedItem);
 
-    const newBlocks = [...blocks];
-    const [draggedItem] = newBlocks.splice(draggedIndex, 1);
-    newBlocks.splice(targetIndex, 0, draggedItem);
-
-    setBlocks(newBlocks);
-    setDraggedBlock(null);
+      setBlocks(newBlocks);
+      setDraggedBlock(null);
+    }
   };
 
   const getColorClasses = (color: CodeBlock["color"]) => {
@@ -123,9 +197,42 @@ export const SimpleIDE = () => {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <Card className="p-6 rounded-super shadow-medium">
-            <div className="grid lg:grid-cols-2 gap-6 h-96">
+            <div className="grid lg:grid-cols-3 gap-6 h-96">
+              {/* Block Palette */}
+              <div className="bg-muted rounded-playful p-4 relative overflow-hidden">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">
+                    🧩 Block Palette
+                  </h3>
+                </div>
+                
+                <div className="space-y-3 overflow-y-auto h-full">
+                  {["Events", "Actions", "Logic", "Numbers"].map((category) => (
+                    <div key={category} className="space-y-2">
+                      <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        {category}
+                      </h4>
+                      {paletteBlocks
+                        .filter(block => block.category === category)
+                        .map((block) => (
+                          <div
+                            key={block.id}
+                            draggable
+                            onDragStart={(e) => handlePaletteDragStart(e, block)}
+                            className={`${getColorClasses(block.color)} p-2 rounded-lg cursor-grab hover-lift transition-transform duration-200 text-sm ${
+                              draggedFromPalette?.id === block.id ? 'opacity-50 scale-95' : ''
+                            }`}
+                          >
+                            {block.text}
+                          </div>
+                        ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Coding Area */}
               <div className="bg-muted rounded-playful p-4 relative overflow-hidden">
                 <div className="flex items-center justify-between mb-4">
@@ -138,21 +245,34 @@ export const SimpleIDE = () => {
                 </div>
                 
                 {mode === "blocks" ? (
-                  <div className="space-y-3" onDragOver={handleDragOver}>
-                    {blocks.map((block, index) => (
-                      <div
-                        key={block.id}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, block.id)}
-                        onDrop={(e) => handleDrop(e, index)}
-                        className={`${getColorClasses(block.color)} p-3 rounded-lg cursor-move hover-lift transition-transform duration-200 ${
-                          draggedBlock === block.id ? 'opacity-50 scale-95' : ''
-                        } ${block.indent > 0 ? `ml-${block.indent * 4}` : ''}`}
-                        style={{ marginLeft: block.indent * 16 }}
-                      >
-                        {block.text}
+                  <div className="space-y-3 min-h-48" onDragOver={handleDragOver}>
+                    {blocks.length === 0 ? (
+                      <div className="text-center text-muted-foreground py-8 border-2 border-dashed border-muted-foreground/30 rounded-lg">
+                        <div className="text-2xl mb-2">👋</div>
+                        <div>Drag blocks here to start coding!</div>
                       </div>
-                    ))}
+                    ) : (
+                      blocks.map((block, index) => (
+                        <div
+                          key={block.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, block.id)}
+                          onDrop={(e) => handleDrop(e, index)}
+                          className={`${getColorClasses(block.color)} p-3 rounded-lg cursor-move hover-lift transition-transform duration-200 ${
+                            draggedBlock === block.id ? 'opacity-50 scale-95' : ''
+                          } ${block.indent > 0 ? `ml-${block.indent * 4}` : ''}`}
+                          style={{ marginLeft: block.indent * 16 }}
+                        >
+                          {block.text}
+                        </div>
+                      ))
+                    )}
+                    {/* Drop zone at the end */}
+                    <div
+                      className="h-4 rounded border-2 border-dashed border-transparent hover:border-primary/50 transition-colors"
+                      onDrop={(e) => handleDrop(e, blocks.length)}
+                      onDragOver={handleDragOver}
+                    />
                   </div>
                 ) : (
                   <div className="bg-card p-4 rounded-lg font-mono text-sm">
