@@ -3,14 +3,65 @@ import { PlayfulButton } from "@/components/ui/playful-button";
 import { Play, Square, RotateCcw, Settings } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
+interface CodeBlock {
+  id: string;
+  text: string;
+  color: "primary" | "secondary" | "accent";
+  indent: number;
+}
+
 export const SimpleIDE = () => {
   const [mode, setMode] = useState<"blocks" | "text">("blocks");
   const [isRunning, setIsRunning] = useState(false);
+  const [draggedBlock, setDraggedBlock] = useState<string | null>(null);
+  const [blocks, setBlocks] = useState<CodeBlock[]>([
+    { id: "1", text: "🚀 When start button clicked", color: "primary", indent: 0 },
+    { id: "2", text: "📱 Say \"Hello, World!\"", color: "secondary", indent: 1 },
+    { id: "3", text: "⭐ Add 10 points", color: "accent", indent: 1 }
+  ]);
 
   const handleRun = () => {
     setIsRunning(true);
     // Simulate code execution
     setTimeout(() => setIsRunning(false), 2000);
+  };
+
+  const handleDragStart = (e: React.DragEvent, blockId: string) => {
+    setDraggedBlock(blockId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (!draggedBlock) return;
+
+    const draggedIndex = blocks.findIndex(block => block.id === draggedBlock);
+    if (draggedIndex === -1) return;
+
+    const newBlocks = [...blocks];
+    const [draggedItem] = newBlocks.splice(draggedIndex, 1);
+    newBlocks.splice(targetIndex, 0, draggedItem);
+
+    setBlocks(newBlocks);
+    setDraggedBlock(null);
+  };
+
+  const getColorClasses = (color: CodeBlock["color"]) => {
+    switch (color) {
+      case "primary":
+        return "bg-primary text-primary-foreground";
+      case "secondary":
+        return "bg-secondary text-secondary-foreground";
+      case "accent":
+        return "bg-accent text-accent-foreground";
+      default:
+        return "bg-primary text-primary-foreground";
+    }
   };
 
   return (
@@ -55,16 +106,21 @@ export const SimpleIDE = () => {
                 </div>
                 
                 {mode === "blocks" ? (
-                  <div className="space-y-3">
-                    <div className="bg-primary text-primary-foreground p-3 rounded-lg cursor-move hover-lift">
-                      🚀 When start button clicked
-                    </div>
-                    <div className="bg-secondary text-secondary-foreground p-3 rounded-lg cursor-move hover-lift ml-4">
-                      📱 Say "Hello, World!"
-                    </div>
-                    <div className="bg-accent text-accent-foreground p-3 rounded-lg cursor-move hover-lift ml-4">
-                      ⭐ Add 10 points
-                    </div>
+                  <div className="space-y-3" onDragOver={handleDragOver}>
+                    {blocks.map((block, index) => (
+                      <div
+                        key={block.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, block.id)}
+                        onDrop={(e) => handleDrop(e, index)}
+                        className={`${getColorClasses(block.color)} p-3 rounded-lg cursor-move hover-lift transition-transform duration-200 ${
+                          draggedBlock === block.id ? 'opacity-50 scale-95' : ''
+                        } ${block.indent > 0 ? `ml-${block.indent * 4}` : ''}`}
+                        style={{ marginLeft: block.indent * 16 }}
+                      >
+                        {block.text}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="bg-card p-4 rounded-lg font-mono text-sm">
